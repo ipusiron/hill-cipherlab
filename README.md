@@ -157,11 +157,9 @@ $0 \rightarrow \text{A}$, $19 \rightarrow \text{T}$ なので、"LP"は"AT"に�
 
 > **補足：2×2行列の逆行列の公式**
 >
-> 一般に、$K = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$ の逆行列は次のように求められます：
+> 一般に、$`K = \begin{bmatrix} a & b \\ c & d \end{bmatrix}`$ の逆行列は次のように求められます。
 >
-```math
-K^{-1} = \frac{1}{\det K} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}
-```
+> $`K^{-1} = \frac{1}{\det K} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}`$
 
 この公式を踏まえて、計算しましょう。
 
