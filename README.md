@@ -159,9 +159,9 @@ $0 \rightarrow \text{A}$, $19 \rightarrow \text{T}$ なので、"LP"は"AT"に�
 >
 > 一般に、$K = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$ の逆行列は次のように求められます：
 >
-> $$
-> K^{-1} = \frac{1}{\det K} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}
-> $$
+```math
+K^{-1} = \frac{1}{\det K} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}
+```
 
 この公式を踏まえて、計算しましょう。
 
@@ -169,7 +169,7 @@ $0 \rightarrow \text{A}$, $19 \rightarrow \text{T}$ なので、"LP"は"AT"に�
 \det(K) = 3 \times 5 - 3 \times 2 = 15 - 6 = 9
 ```
 
-9の逆数をmod 26で求めると、$9^{-1} \equiv 3 \pmod{26}$
+9の逆数をmod 26で求めると、$`9^{-1} \equiv 3 \pmod{26}`$
 
 ```math
 K^{-1} = \frac{1}{\det K} \begin{bmatrix} 5 & -3 \\ -2 & 3 \end{bmatrix} =
@@ -177,7 +177,7 @@ K^{-1} = \frac{1}{\det K} \begin{bmatrix} 5 & -3 \\ -2 & 3 \end{bmatrix} =
 \begin{bmatrix} 15 & 17 \\ 20 & 9 \end{bmatrix} \pmod{26}
 ```
 
-検算：
+以下は検算です。
 
 ```math
 K \cdot K^{-1} =
