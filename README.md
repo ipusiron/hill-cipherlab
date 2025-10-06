@@ -411,20 +411,20 @@ $\mathbf{y}=A\mathbf{x}+\mathbf{B}, \mathbf{B}=\mathbf{0}$ と考えると、ア
 
 各要素の**余因子**を並べた行列です。余因子とは、その要素を除いた小行列の行列式に符号 $(-1)^{i+j}$ を掛けたものです。
 
-$$
+```math
 \mathrm{Cof}(K) = [(-1)^{i+j}\det M_{ij}]
-$$
+```
 
 ここで $M_{ij}$ は、$i$ 行 $j$ 列を除いた小行列（minor）を指します。
 
-**例**：$K = \begin{bmatrix} 3 & 3 \\ 2 & 5 \end{bmatrix}$ の場合
+**例**：$`K = \begin{bmatrix} 3 & 3 \\ 2 & 5 \end{bmatrix}`$ の場合
 
 - $(1,1)$ 要素の余因子: $(-1)^{1+1} \det[5] = 5$
 - $(1,2)$ 要素の余因子: $(-1)^{1+2} \det[2] = -2$
 - $(2,1)$ 要素の余因子: $(-1)^{2+1} \det[3] = -3$
 - $(2,2)$ 要素の余因子: $(-1)^{2+2} \det[3] = 3$
 
-よって、$\mathrm{Cof}(K) = \begin{bmatrix} 5 & -2 \\ -3 & 3 \end{bmatrix}$
+よって、$`\mathrm{Cof}(K) = \begin{bmatrix} 5 & -2 \\ -3 & 3 \end{bmatrix}`$
 
 ### 随伴行列（Adjugate Matrix / Adjoint）
 
