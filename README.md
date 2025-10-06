@@ -272,7 +272,7 @@ y_4 &= 20x_1 + 3x_2 + 6x_3 + 11x_4
 \end{aligned}
 $$
 
-ベクトル $\mathbf{x}=(x_1, x_2, x_3, x_4)$ と $\mathbf{y}=(y_1, y_2, y_3, y_4)$ 、係数行列 $A$ を使うと、$\mathbf{y}=A\mathbf{x}$ と表現できます。
+ベクトル $\mathbf{x}=(x_1, x_2, x_3, x_4)$ と $\mathbf{y}=(y_1, y_2, y_3, y_4)$ 、係数行列 $A$ を使うと、$`\mathbf{y}=A\mathbf{x}`$ と表現できます。
 
 $\mathbf{y}=A\mathbf{x}+\mathbf{B}, \mathbf{B}=\mathbf{0}$ と考えると、アフィン暗号の行列版と捉えられます。
 行列 $A$ が暗号鍵そのものです。
@@ -430,23 +430,23 @@ $$
 
 余因子行列の**転置**（行と列を入れ替えたもの）が随伴行列です。
 
-$$
+```math
 \mathrm{adj}(K) = \mathrm{Cof}(K)^\mathsf{T}
-$$
+```
 
 **例**：上記の余因子行列を転置すると
 
-$$
+```math
 \mathrm{adj}(K) = \begin{bmatrix} 5 & -3 \\ -2 & 3 \end{bmatrix}
-$$
+```
 
 ### 逆行列の計算式
 
 随伴行列と行列式の逆元を使って、逆行列を計算します。
 
-$$
+```math
 K^{-1} \equiv (\det K)^{-1} \cdot \mathrm{adj}(K) \pmod{26}
-$$
+```
 
 この公式により、mod 26の世界でも逆行列を求めることができます。
 
