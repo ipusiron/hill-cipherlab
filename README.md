@@ -415,7 +415,7 @@ $\mathbf{y}=A\mathbf{x}+\mathbf{B}, \mathbf{B}=\mathbf{0}$ と考えると、ア
 \mathrm{Cof}(K) = [(-1)^{i+j}\det M_{ij}]
 ```
 
-ここで $M_{ij}$ は、$i$ 行 $j$ 列を除いた小行列（minor）を指します。
+ここで $M_{ij}$ は、 $i$ 行 $j$ 列を除いた小行列（minor）を指します。
 
 **例**：$`K = \begin{bmatrix} 3 & 3 \\ 2 & 5 \end{bmatrix}`$ の場合
 
