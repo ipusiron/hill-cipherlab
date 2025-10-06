@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hill CipherLab</title>
+
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+  <link rel="stylesheet" href="style.css" />
+  <meta name="description" content="Hill cipher (2x2/3x3) encrypt/decrypt with modular inverse and matrix validation in the browser.">
+</head>
+<body>
+  <header>
+    <h1>Hill CipherLab - ヒル暗号ツール</h1>
+    <p class="subtitle">法26の世界で2×2 / 3×3の鍵行列で暗号化・復号する</p>
+  </header>
+
+  <main>
+    <!-- タブナビゲーション -->
+    <div class="tabs">
+      <button class="tab active" data-tab="key">🔑 鍵生成</button>
+      <button class="tab" data-tab="encrypt">🔒 暗号化</button>
+      <button class="tab" data-tab="decrypt">🔓 復号</button>
+      <button class="tab" data-tab="learn">📚 座学</button>
+    </div>
+
+    <!-- 鍵生成タブ -->
+    <section id="tab-key" class="tab-content active">
+      <div class="card">
+        <h2>🔑 鍵行列Kの設定</h2>
+        <div class="grid grid-2">
+          <div>
+            <label>Kのブロックサイズ</label>
+            <div class="segmented">
+              <button id="size2" class="seg active" data-n="2">2×2</button>
+              <button id="size3" class="seg" data-n="3">3×3</button>
+            </div>
+
+            <div id="matrixArea"></div>
+
+            <div class="actions compact key-actions">
+              <button id="btnRandom">ランダム生成（可逆）</button>
+              <button id="btnIdentity">単位行列</button>
+            </div>
+            <div class="actions compact">
+              <button id="btnClearKey">クリア</button>
+            </div>
+          </div>
+
+          <div>
+            <label>鍵の検証</label>
+            <div class="info">
+              <div><strong>使用可否</strong>: <span id="invertible">-</span></div>
+              <details class="keyDetails">
+                <summary>詳細情報を表示</summary>
+                <div class="detailsContent">
+                  <div><strong>det(K)</strong>: <span id="detK">-</span></div>
+                  <div><strong>det(K) mod 26</strong>: <span id="detKmod">-</span></div>
+                  <div><strong>gcd(det(K), 26)</strong>: <span id="gcdVal">-</span></div>
+                  <div><strong>det(K)<sup>-1</sup> mod 26</strong>: <span id="detInv">-</span></div>
+                </div>
+              </details>
+            </div>
+
+            <label>Kの逆行列（mod 26）</label>
+            <div id="invMatrix" class="matrixDisplay">-</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 暗号化タブ -->
+    <section id="tab-encrypt" class="tab-content">
+      <div class="card">
+        <h2>🔒 暗号化</h2>
+        <div id="warning-encrypt" class="warning hidden"></div>
+        <div>
+          <label for="plaintext">平文（英字のみ有効）</label>
+          <textarea id="plaintext" rows="6" placeholder="例: HELLOWORLD"></textarea>
+          <div class="muted">非英字、空白、記号は無視。末尾はXでパディングされます。</div>
+          <div style="margin-top: 8px;">
+            <label class="muted-label">処理後の平文</label>
+            <div id="processed-plaintext" class="processed-text">-</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="ciphertext-encrypt">暗号文</label>
+            <button id="btnCopyEncrypt" class="copy-btn" title="クリップボードにコピー">📋 コピー</button>
+          </div>
+          <textarea id="ciphertext-encrypt" rows="6" placeholder="暗号化結果がここに表示されます" readonly></textarea>
+        </div>
+
+        <div class="actions">
+          <div class="actions-primary">
+            <button id="btnEncrypt">暗号化</button>
+          </div>
+          <div class="actions-secondary">
+            <button id="btnClearEncrypt">クリア</button>
+          </div>
+        </div>
+
+        <details class="explain">
+          <summary>処理ログ（ブロック計算の詳細）</summary>
+          <pre id="log-encrypt"></pre>
+        </details>
+      </div>
+    </section>
+
+    <!-- 復号タブ -->
+    <section id="tab-decrypt" class="tab-content">
+      <div class="card">
+        <h2>🔓 復号</h2>
+        <div id="warning-decrypt" class="warning hidden"></div>
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label for="ciphertext-decrypt">暗号文</label>
+            <button id="btnSyncCiphertext" class="copy-btn" title="暗号化タブから同期">🔄 同期</button>
+          </div>
+          <textarea id="ciphertext-decrypt" rows="6" placeholder="例: HIATXXX"></textarea>
+          <div class="muted">鍵行列のサイズによっては末尾をXでパディングします。</div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label for="plaintext-decrypt">平文</label>
+            <button id="btnCopyDecrypt" class="copy-btn" title="クリップボードにコピー">📋 コピー</button>
+          </div>
+          <textarea id="plaintext-decrypt" rows="6" placeholder="復号結果がここに表示されます" readonly></textarea>
+          <div class="muted">復号結果の末尾にXが現れた場合、パディング用のXの可能性が高いですが、元のメッセージの文字である可能性もあります。</div>
+        </div>
+
+        <div class="actions">
+          <div class="actions-primary">
+            <button id="btnDecrypt">復号</button>
+          </div>
+          <div class="actions-secondary">
+            <button id="btnClearDecrypt">クリア</button>
+          </div>
+        </div>
+
+        <details class="explain">
+          <summary>処理ログ（ブロック計算の詳細）</summary>
+          <pre id="log-decrypt"></pre>
+        </details>
+      </div>
+    </section>
+
+    <!-- 座学タブ -->
+    <section id="tab-learn" class="tab-content">
+      <div class="card">
+        <h2>📚 学びの要点</h2>
+
+        <details class="learn-accordion" open>
+          <summary>🔑 鍵の可逆性条件</summary>
+          <div class="accordion-content">
+            <p>逆行列が存在する（= 復号できる）ためには、以下の条件が必要です：</p>
+            <div class="highlight-box">
+              <strong>gcd(det(K), 26) = 1</strong>
+            </div>
+            <p>つまり、行列式が <strong>2 と 13 の倍数ではない</strong> 必要があります。</p>
+            <ul>
+              <li>2×2 行列より 3×3 行列のほうが可逆な鍵の比率は下がる傾向</li>
+              <li>実装では <em>余因子 → 随伴 → det の逆元</em> の順で逆行列を計算</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="learn-accordion">
+          <summary>⚠️ 本ツールの制約</summary>
+          <div class="accordion-content">
+            <h4>非英字の扱い</h4>
+            <p>非英字・空白・記号は暗号化時に無視されます。そのため、<strong>復号結果には単語間の空白や文末のピリオドなどは含まれません</strong>。</p>
+            <div class="example-box">
+              <div class="example-title">例</div>
+              <code>"HELLO WORLD."</code> → 処理 → <code>"HELLOWORLD"</code> → 暗号化 → 復号 → <code>"HELLOWORLD"</code>
+            </div>
+            <p>空白とピリオドは復元されないため、人間が文脈から <code>"HELLO WORLD."</code> に戻す必要があります。</p>
+
+            <h4>パディングのX</h4>
+            <p>復号結果の末尾にXが現れた場合：</p>
+            <ul>
+              <li><strong>大半のケース</strong>: ブロック長を合わせるためのパディング用X</li>
+              <li><strong>稀なケース</strong>: 元のメッセージに含まれていた文字X</li>
+            </ul>
+            <p>文脈から判断する必要があります。</p>
+          </div>
+        </details>
+
+        <details class="learn-accordion">
+          <summary>🎓 教育的意義</summary>
+          <div class="accordion-content">
+            <ul>
+              <li><strong>線形代数の応用</strong>: 行列式・余因子・随伴・逆行列を有限環 ℤ₂₆ 上で体験</li>
+              <li><strong>暗号の基礎</strong>: ブロック暗号の基本概念を理解</li>
+              <li><strong>セキュリティの限界</strong>: 古典暗号の脆弱性（既知平文攻撃など）を学ぶ入口</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer">🔗 GitHubリポジトリはこちら（ <a href="https://github.com/ipusiron/hill-cipherlab" target="_blank" rel="noopener noreferrer">ipusiron/hill-cipherlab</a> ）</div>
+  </footer>
+
+  <!-- トースト通知 -->
+  <div id="toast" class="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
