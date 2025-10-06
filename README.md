@@ -94,9 +94,9 @@ demo: https://ipusiron.github.io/hill-cipherlab/
 
 暗号鍵に相当する鍵行列を決めます。
 
-$$
+```math
 K = \begin{bmatrix} 3 & 3 \\ 2 & 5 \end{bmatrix}
-$$
+```
 
 ### 暗号化
 
@@ -108,42 +108,42 @@ $$
 
 1：文字を数字に変換します。
 
-$$
+```math
 \text{H}=7, \quad \text{E}=4, \quad \text{L}=11, \quad \text{P}=15
-$$
+```
 
 2：2文字ずつまとめてベクトルにします。
 
-$$
+```math
 \text{HE} \rightarrow \begin{bmatrix} 7 \\ 4 \end{bmatrix}, \quad
 \text{LP} \rightarrow \begin{bmatrix} 11 \\ 15 \end{bmatrix}
-$$
+```
 
 3：鍵行列との掛け算します。ただし、法26の世界で考えます。
 
 最初の2文字"HE"は、次のように暗号化できます。
 
-$$
+```math
 K \begin{bmatrix} 7 \\ 4 \end{bmatrix} =
 \begin{bmatrix} 3 & 3 \\ 2 & 5 \end{bmatrix} \begin{bmatrix} 7 \\ 4 \end{bmatrix} =
 \begin{bmatrix} 3 \times 7 + 3 \times 4 \\ 2 \times 7 + 5 \times 4 \end{bmatrix} =
 \begin{bmatrix} 21 + 12 \\ 14 + 20 \end{bmatrix} =
 \begin{bmatrix} 33 \\ 34 \end{bmatrix} \equiv
 \begin{bmatrix} 7 \\ 8 \end{bmatrix} \pmod{26}
-$$
+```
 
 $7 \rightarrow \text{H}$, $8 \rightarrow \text{I}$ なので、"HE"は"HI"に変換されます。
 
 次の平文文字列"LP"は、次のように暗号化できます。
 
-$$
+```math
 K \begin{bmatrix} 11 \\ 15 \end{bmatrix} =
 \begin{bmatrix} 3 & 3 \\ 2 & 5 \end{bmatrix} \begin{bmatrix} 11 \\ 15 \end{bmatrix} =
 \begin{bmatrix} 3 \times 11 + 3 \times 15 \\ 2 \times 11 + 5 \times 15 \end{bmatrix} =
 \begin{bmatrix} 33 + 45 \\ 22 + 75 \end{bmatrix} =
 \begin{bmatrix} 78 \\ 97 \end{bmatrix} \equiv
 \begin{bmatrix} 0 \\ 19 \end{bmatrix} \pmod{26}
-$$
+```
 
 $0 \rightarrow \text{A}$, $19 \rightarrow \text{T}$ なので、"LP"は"AT"に変換されます。
 
@@ -165,21 +165,21 @@ $0 \rightarrow \text{A}$, $19 \rightarrow \text{T}$ なので、"LP"は"AT"に�
 
 この公式を踏まえて、計算しましょう。
 
-$$
+```math
 \det(K) = 3 \times 5 - 3 \times 2 = 15 - 6 = 9
-$$
+```
 
 9の逆数をmod 26で求めると、$9^{-1} \equiv 3 \pmod{26}$
 
-$$
+```math
 K^{-1} = \frac{1}{\det K} \begin{bmatrix} 5 & -3 \\ -2 & 3 \end{bmatrix} =
 3 \times \begin{bmatrix} 5 & -3 \\ -2 & 3 \end{bmatrix} \equiv
 \begin{bmatrix} 15 & 17 \\ 20 & 9 \end{bmatrix} \pmod{26}
-$$
+```
 
 検算：
 
-$$
+```math
 K \cdot K^{-1} =
 \begin{bmatrix} 3 & 3 \\ 2 & 5 \end{bmatrix} \begin{bmatrix} 15 & 17 \\ 20 & 9 \end{bmatrix} =
 \begin{bmatrix} 3 \times 15 + 3 \times 20 & 3 \times 17 + 3 \times 9 \\
@@ -187,7 +187,7 @@ K \cdot K^{-1} =
 \begin{bmatrix} 45 + 60 & 51 + 27 \\ 30 + 100 & 34 + 45 \end{bmatrix} =
 \begin{bmatrix} 105 & 78 \\ 130 & 79 \end{bmatrix} \equiv
 \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} \pmod{26} = I
-$$
+```
 
 確かに得られた $K^{-1}$ と $K$ を乗算すると $I$（単位行列）になっています。
 
@@ -195,26 +195,26 @@ $$
 
 暗号文文字列"HI"は、次のように復号できます。
 
-$$
+```math
 K^{-1} \begin{bmatrix} 7 \\ 8 \end{bmatrix} =
 \begin{bmatrix} 15 & 17 \\ 20 & 9 \end{bmatrix} \begin{bmatrix} 7 \\ 8 \end{bmatrix} =
 \begin{bmatrix} 15 \times 7 + 17 \times 8 \\ 20 \times 7 + 9 \times 8 \end{bmatrix} =
 \begin{bmatrix} 105 + 136 \\ 140 + 72 \end{bmatrix} =
 \begin{bmatrix} 241 \\ 212 \end{bmatrix} \equiv
 \begin{bmatrix} 7 \\ 4 \end{bmatrix} \pmod{26}
-$$
+```
 
 "HI"⇒"HE"と変換されます。
 
 次に暗号文文字列"AT"は、次のように復号できます。
 
-$$
+```math
 K^{-1} \begin{bmatrix} 0 \\ 19 \end{bmatrix} =
 \begin{bmatrix} 15 & 17 \\ 20 & 9 \end{bmatrix} \begin{bmatrix} 0 \\ 19 \end{bmatrix} =
 \begin{bmatrix} 15 \times 0 + 17 \times 19 \\ 20 \times 0 + 9 \times 19 \end{bmatrix} =
 \begin{bmatrix} 323 \\ 171 \end{bmatrix} \equiv
 \begin{bmatrix} 11 \\ 15 \end{bmatrix} \pmod{26}
-$$
+```
 
 "AT"⇒"LP"と変換されます。
 
