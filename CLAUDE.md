@@ -32,27 +32,29 @@ No build process, dependencies, or compilation required.
 
 The implementation follows this structure:
 
-1. **Modular Arithmetic Utilities** (lines 11-35):
+1. **Modular Arithmetic Utilities** (~lines 30-72):
    - `gcd(a, b)`: Euclidean algorithm for greatest common divisor
    - `mod(a, m)`: Modular reduction (always returns non-negative)
    - `modInv(a, m)`: Extended Euclidean algorithm for modular multiplicative inverse
 
-2. **Matrix Operations** (lines 58-119):
+2. **Matrix Operations** (~lines 114-227):
    - `det2(M)` / `det3(M)`: Determinant calculation for 2×2 and 3×3 matrices
    - `adjugate2(M)` / `adjugate3(M)`: Adjugate matrix via cofactor matrix transpose
    - `matMulVec(M, v)`: Matrix-vector multiplication (mod 26)
    - `matScalar(M, s)`: Scalar multiplication of matrix
 
-3. **Key Validation** (lines 200-231):
+3. **Key Validation** (`updateKeyInfo()` ~line 364):
    - Checks if `gcd(det(K), 26) = 1` (required for invertibility)
    - Computes modular inverse of determinant
    - Displays inverse matrix K⁻¹ in UI
 
-4. **Encryption/Decryption** (lines 246-288):
+4. **Encryption/Decryption** (`encrypt()` / `decrypt()` ~lines 459-522):
    - Converts A-Z to 0-25
    - Pads plaintext/ciphertext with 'X' (23) to block size
    - Encrypts: `C ≡ K·P (mod 26)`
    - Decrypts: `P ≡ K⁻¹·C (mod 26)`
+
+For detailed algorithm explanations and code snippets, see [TECHNICAL.md](TECHNICAL.md).
 
 ### Hill Cipher Mathematics
 
@@ -87,12 +89,13 @@ Non-alphabetic characters are ignored. If the text length isn't a multiple of th
 
 ```
 .
-├── index.html       # Main HTML structure and UI elements
+├── index.html       # Main HTML structure and UI elements (4-tab UI)
 ├── script.js        # All Hill cipher logic and matrix operations
 ├── style.css        # Calm light theme with accessibility features
+├── README.md        # Detailed documentation (Japanese) with cipher theory
+├── TECHNICAL.md     # Technical implementation details (developer docs)
 ├── .nojekyll        # GitHub Pages configuration (no Jekyll processing)
-├── .gitignore       # Standard git ignore file
-└── README.md        # Detailed documentation (Japanese) with cipher theory
+└── .gitignore       # Standard git ignore file
 ```
 
 ## Historical Context (from README)
@@ -113,3 +116,12 @@ From the same author's "100 Security Tools" series:
 - **Hill Cipher** (this tool): Matrix-based (n chars → n chars)
 
 Hill cipher can be viewed as matrix-based affine cipher: `Enc(x) = Ax + B` where `B = 0`.
+
+## Security Considerations
+
+The implementation includes:
+- **XSS prevention**: Input sanitization via `textContent` (not `innerHTML`) and character escaping
+- **DoS prevention**: Input length capped at 10,000 characters
+- **Safe DOM manipulation**: Uses `removeChild` loops instead of `innerHTML = ''`
+
+Note: Hill cipher itself is cryptographically weak (vulnerable to known-plaintext attacks) and should only be used for educational purposes.

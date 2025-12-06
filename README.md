@@ -1,11 +1,37 @@
 <!--
 ---
-title: Hill CipherLab
-category: classical-crypto
-difficulty: 3
-description: Linear algebra–based classical cipher (Hill cipher) with 2×2 / 3×3 keys. Encrypt/Decrypt in mod 26, visualize matrix inverse and validation.
-tags: [cryptography, classical, hill, matrix, education, javascript]
-demo: https://ipusiron.github.io/hill-cipherlab/
+id: day093
+slug: hill-cipherlab
+
+title: "Hill CipherLab"
+
+subtitle_ja: "ヒル暗号ツール"
+subtitle_en: "Hill Cipher Educational Tool"
+
+description_ja: "行列演算（2×2/3×3）を用いた古典暗号「ヒル暗号」の暗号化・復号ツール。mod 26での逆行列計算、鍵の可逆性検証、処理ログの可視化機能を搭載。"
+description_en: "Linear algebra–based classical cipher (Hill cipher) with 2×2 / 3×3 keys. Encrypt/Decrypt in mod 26, visualize matrix inverse and key validation."
+
+category_ja:
+  - 古典暗号
+category_en:
+  - Classical Cryptography
+
+difficulty: 4
+
+tags:
+  - cryptography
+  - classical
+  - hill-cipher
+  - matrix
+  - linear-algebra
+  - mod26
+  - education
+  - javascript
+
+repo_url: "https://github.com/ipusiron/hill-cipherlab"
+demo_url: "https://ipusiron.github.io/hill-cipherlab/"
+
+hub: true
 ---
 -->
 
