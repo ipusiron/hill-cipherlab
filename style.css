@@ -791,3 +791,15 @@ table.euclid tr.hit td {
   color: #92400E;
   text-align: center;
 }
+
+/* 開閉の印（summary を flex にすると既定の印が消えるので、自前で描く） */
+.keyDetails summary, .explain summary { list-style: none; }
+.keyDetails summary::-webkit-details-marker, .explain summary::-webkit-details-marker { display: none; }
+.keyDetails summary::before, .explain summary::before {
+  content: '▶';
+  display: inline-block;
+  font-size: 12px;
+  margin-right: 4px;
+  transition: transform .2s ease;
+}
+.keyDetails[open] > summary::before, .explain[open] > summary::before { transform: rotate(90deg); }
