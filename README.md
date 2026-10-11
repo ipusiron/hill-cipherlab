@@ -577,9 +577,11 @@ hill-cipherlab/
 │   ├── hill-attack.js        # 既知平文攻撃と暗号文単独攻撃
 │   ├── hill-core.js          # 計算部（行列式・逆行列・暗号化・復号。DOM に依存しない）
 │   ├── hill-lab.js           # 線形性の計算とURL入力の検証
+│   ├── i18n.js               # 言語の切り替えと保存
 │   ├── lab-view.js           # 線形性の実験とURL入力の表示
 │   ├── messages.js           # 画面に出す文言の辞書
-│   └── samples.js            # 解読タブの学習用サンプル
+│   ├── samples.js            # 解読タブの学習用サンプル
+│   └── static-messages.js    # 固定の画面説明の日英辞書
 ├── test/                     # node --test のテスト
 │   ├── attack.test.js        # 解読の既知解答と境界
 │   ├── contrast.test.js      # 配色のコントラスト（4.5:1以上）

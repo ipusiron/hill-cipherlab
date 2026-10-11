@@ -108,7 +108,7 @@
     statusLine(kpaResult, r.status === 'solved', t(`kpa.status.${r.status}`));
     para(kpaResult, t('kpa.summary', { blocks: r.blocks, used: r.used, n: r.n, r2: r.rank2, r13: r.rank13 }));
     if (r.direct) {
-      const idx = r.direct.indices.map((i) => i + 1).join('・');
+      const idx = r.direct.indices.map((i) => i + 1).join(', ');
       para(kpaResult, t('kpa.directText', { blocks: idx, det: r.direct.detP }));
       matrices(kpaResult, [['P', r.direct.P], ['P⁻¹', r.direct.Pinv], ['C', r.direct.C], ['K = C × P⁻¹', r.direct.K]]);
     } else if (r.status === 'solved' || r.status === 'notInvertible') {

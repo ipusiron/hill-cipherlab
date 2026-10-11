@@ -531,6 +531,13 @@
 
   // 初期化
   setSize(2);
+  document.addEventListener('languagechange', () => {
+    inputs.forEach((inp, i) => inp.setAttribute('aria-label', t('key.cellLabel', { row: Math.floor(i / N) + 1, col: i % N + 1 })));
+    updateKeyInfo();
+    updateRatio();
+    toastEl.textContent = '';
+    srStatusEl.textContent = '';
+  });
 
   // ほかの画面（解読タブなど）から使う部品
   globalThis.HillApp = {

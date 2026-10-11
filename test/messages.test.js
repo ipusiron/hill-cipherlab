@@ -6,6 +6,34 @@ const M = load('js/messages.js').HillMessages;
 const script = read('script.js');
 const coreSrc = read('js/hill-core.js');
 
+test('日英のキーとプレースホルダーが一致する', () => {
+  assert.deepEqual(Object.keys(M.dict.en).sort(), Object.keys(M.dict.ja).sort());
+  for (const k of Object.keys(M.dict.ja)) {
+    const args = (s) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+    assert.deepEqual(args(M.dict.ja[k]), args(M.dict.en[k]), k);
+    assert.ok(M.dict.en[k].length > 0);
+  }
+});
+
+test('解読と実験の文言・誤りにも未登録キーがない', () => {
+  for (const f of ['js/attack-view.js', 'js/lab-view.js', 'js/hill-lab.js', 'js/hill-attack.js']) {
+    for (const m of read(f).matchAll(/['"]((?:kpa|coa|crib|attack|lab|import|err)\.[a-zA-Z0-9.]+)['"]/g)) {
+      assert.ok(Object.hasOwn(M.dict.ja, m[1]), `${f}: ${m[1]}`);
+    }
+  }
+  for (const status of ['solved', 'ambiguous', 'notInvertible', 'inconsistent']) {
+    assert.ok(Object.hasOwn(M.dict.en, `kpa.status.${status}`));
+  }
+});
+
+test('静的HTMLの日本語のテキストと属性に英訳がある', () => {
+  const pairs = load('js/static-messages.js').HillStaticMessages;
+  const html = read('index.html').replace(/<!--[\s\S]*?-->/g, '').replace(/<noscript>[\s\S]*?<\/noscript>/g, '');
+  const texts = [...html.matchAll(/>([^<>]+)</g)].map((m) => m[1].trim());
+  texts.push(...[...html.matchAll(/(?:title|placeholder|aria-label)="([^"]+)"/g)].map((m) => m[1]));
+  for (const s of texts.filter((x) => /[\u3040-\u30ff\u3400-\u9fff]/.test(x))) assert.ok(Object.hasOwn(pairs, s), s);
+});
+
 test('script.js が引くキーはすべて辞書にある', () => {
   const keys = new Set([...script.matchAll(/\bt\(\s*'([a-zA-Z0-9.]+)'/g)].map((m) => m[1]));
   // テンプレートで組み立てるキー（key.reason.${reason}）

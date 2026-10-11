@@ -776,6 +776,11 @@ table.euclid tr.hit td {
   margin: 12px 0 8px;
 }
 .gap-top { margin-top: 16px; }
+.header-tools { display: flex; justify-content: flex-end; max-width: 1200px; margin: 0 auto 8px; }
+.tab, button { overflow-wrap: anywhere; white-space: normal; }
+.grid > *, .card { min-width: 0; }
+input[type="text"] { width: 100%; min-height: 44px; font-size: 16px; }
+header h1, header .subtitle { text-align: center; }
 .sample-row, .mode { margin: 12px 0; }
 .sample-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .mode .radio { display: flex; align-items: center; gap: 8px; min-height: 44px; }

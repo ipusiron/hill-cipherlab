@@ -14,6 +14,7 @@
 <body>
   <noscript><p class="noscript">このツールはJavaScriptで動きます。ブラウザーの設定でJavaScriptを有効にしてください。</p></noscript>
   <header>
+    <div class="header-tools"><button id="language-toggle" type="button">English</button></div>
     <h1>Hill CipherLab - ヒル暗号ツール</h1>
     <p class="subtitle">法26の世界で2×2 / 3×3の鍵行列で暗号化・復号する</p>
   </header>
@@ -142,7 +143,7 @@
             <button id="btnCopyDecrypt" class="copy-btn" title="クリップボードにコピー">📋 コピー</button>
           </div>
           <textarea id="plaintext-decrypt" rows="6" placeholder="復号結果がここに表示されます" readonly></textarea>
-          <div class="muted">復号結果の末尾にXが現れた場合、パディング用のXの可能性が高いですが、元のメッセージの文字である可能性もあります。</div>
+          <div class="muted">末尾のXは、パディングか元の文字かを自動では区別できません。</div>
         </div>
 
         <div class="actions">
@@ -270,12 +271,7 @@
             <p>空白とピリオドは復元されないため、人間が文脈から <code>"HELLO WORLD."</code> に戻す必要があります。</p>
 
             <h4>パディングのX</h4>
-            <p>復号結果の末尾にXが現れた場合：</p>
-            <ul>
-              <li><strong>大半のケース</strong>: ブロック長を合わせるためのパディング用X</li>
-              <li><strong>稀なケース</strong>: 元のメッセージに含まれていた文字X</li>
-            </ul>
-            <p>文脈から判断する必要があります。</p>
+            <p>末尾のXは、パディングか元の文字かを自動では区別できません。元の長さや文脈を確認してください。</p>
           </div>
         </details>
 
@@ -307,6 +303,8 @@
   <script src="js/hill-lab.js" defer></script>
   <script src="js/samples.js" defer></script>
   <script src="js/messages.js" defer></script>
+  <script src="js/static-messages.js" defer></script>
+  <script src="js/i18n.js" defer></script>
   <script src="script.js" defer></script>
   <script src="js/attack-view.js" defer></script>
   <script src="js/lab-view.js" defer></script>

@@ -196,7 +196,7 @@
     "err.tooLong": "There are {count} letters. The limit is {limit}.",
     "err.inputTooLong": "Input is too long. The limit is {limit} characters.",
     "err.length": "The ciphertext has {count} letters: {rem} left over in blocks of {n}. Check for missing or extra letters "
-      + "({missing} more would complete a block).",
+      + "(length must be a multiple of {n}; {missing} more would complete a block).",
     "err.lengthSoft": "{count} letters ({missing} more needed for complete blocks of {n})",
     "err.key": "Correct the key cells in the Key tab.",
     "err.syncEmpty": "No ciphertext yet. Encrypt plaintext in the Encrypt tab first.",
