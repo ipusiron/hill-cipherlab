@@ -278,7 +278,7 @@
     const body = el('tbody');
     for (const st of a.euclid.steps) {
       // 余りが 1 になった行の係数 t が逆元（mod 26 で正にした値）
-      const tr = el('tr', st.r === 1 && st.q != null ? 'hit' : null);
+      const tr = el('tr', st.r === 1 ? 'hit' : null);
       for (const v of [st.q == null ? '' : st.q, st.r, st.t]) tr.appendChild(el('td', null, v));
       body.appendChild(tr);
     }
@@ -504,14 +504,27 @@
     flash(btnSyncCiphertext, 'btn.synced', 'btn.sync');
   });
 
-  // タブの切り替え
-  document.querySelectorAll('.tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      const targetTab = tab.dataset.tab;
-      document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x === tab));
-      document.querySelectorAll('.tab-content').forEach((content) => {
-        content.classList.toggle('active', content.id === `tab-${targetTab}`);
-      });
+  // タブの切り替え（WAI-ARIA のタブ。選んだタブだけ Tab キーで止まり、左右・Home・End で移る）
+  const tabs = [...document.querySelectorAll('.tab')];
+  const selectTab = (tab, focus = false) => {
+    for (const x of tabs) {
+      const on = x === tab;
+      x.classList.toggle('active', on);
+      x.setAttribute('aria-selected', String(on));
+      x.tabIndex = on ? 0 : -1;
+    }
+    document.querySelectorAll('.tab-content').forEach((content) => {
+      content.classList.toggle('active', content.id === `tab-${tab.dataset.tab}`);
+    });
+    if (focus) tab.focus();
+  };
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => selectTab(tab));
+    tab.addEventListener('keydown', (e) => {
+      const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (next === undefined) return;
+      e.preventDefault();
+      selectTab(tabs[(next + tabs.length) % tabs.length], true);
     });
   });
 

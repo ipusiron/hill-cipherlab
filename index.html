@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hill CipherLab</title>
-
-  <!-- Security Headers -->
-  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Hill CipherLab - ヒル暗号ツール</title>
+  <link rel="icon" href="data:,">
 
   <link rel="stylesheet" href="style.css" />
   <meta name="description" content="Hill cipher (2x2/3x3) encrypt/decrypt with modular inverse and matrix validation in the browser.">
 </head>
 <body>
+  <noscript><p class="noscript">このツールはJavaScriptで動きます。ブラウザーの設定でJavaScriptを有効にしてください。</p></noscript>
   <header>
     <h1>Hill CipherLab - ヒル暗号ツール</h1>
     <p class="subtitle">法26の世界で2×2 / 3×3の鍵行列で暗号化・復号する</p>
@@ -20,26 +20,26 @@
 
   <main>
     <!-- タブナビゲーション -->
-    <div class="tabs">
-      <button class="tab active" data-tab="key">🔑 鍵生成</button>
-      <button class="tab" data-tab="encrypt">🔒 暗号化</button>
-      <button class="tab" data-tab="decrypt">🔓 復号</button>
-      <button class="tab" data-tab="learn">📚 座学</button>
+    <div class="tabs" role="tablist" aria-label="機能の切り替え">
+      <button class="tab active" id="tabbtn-key" data-tab="key" role="tab" aria-selected="true" aria-controls="tab-key">🔑 鍵生成</button>
+      <button class="tab" id="tabbtn-encrypt" data-tab="encrypt" role="tab" aria-selected="false" aria-controls="tab-encrypt" tabindex="-1">🔒 暗号化</button>
+      <button class="tab" id="tabbtn-decrypt" data-tab="decrypt" role="tab" aria-selected="false" aria-controls="tab-decrypt" tabindex="-1">🔓 復号</button>
+      <button class="tab" id="tabbtn-learn" data-tab="learn" role="tab" aria-selected="false" aria-controls="tab-learn" tabindex="-1">📚 座学</button>
     </div>
 
     <!-- 鍵生成タブ -->
-    <section id="tab-key" class="tab-content active">
+    <section id="tab-key" class="tab-content active" role="tabpanel" aria-labelledby="tabbtn-key">
       <div class="card">
         <h2>🔑 鍵行列Kの設定</h2>
         <div class="grid grid-2">
           <div>
-            <label>Kのブロックサイズ</label>
-            <div class="segmented">
-              <button id="size2" class="seg active" data-n="2">2×2</button>
-              <button id="size3" class="seg" data-n="3">3×3</button>
+            <h3 class="field-title" id="sizeTitle">Kのブロックサイズ</h3>
+            <div class="segmented" role="group" aria-labelledby="sizeTitle">
+              <button id="size2" class="seg active" data-n="2" aria-pressed="true">2×2</button>
+              <button id="size3" class="seg" data-n="3" aria-pressed="false">3×3</button>
             </div>
 
-            <div id="matrixArea"></div>
+            <div id="matrixArea" role="group" aria-label="鍵行列 K"></div>
             <ul id="keyErrors" class="key-errors" aria-live="polite" hidden></ul>
 
             <div class="actions compact key-actions">
@@ -52,7 +52,7 @@
           </div>
 
           <div>
-            <label>鍵の検証</label>
+            <h3 class="field-title">鍵の検証</h3>
             <div class="info">
               <div><strong>使用可否</strong>: <span id="invertible">-</span></div>
               <p id="keyReason" class="key-reason"></p>
@@ -69,7 +69,7 @@
 
             <p id="keyRatio" class="muted"></p>
 
-            <label>Kの逆行列（mod 26）</label>
+            <h3 class="field-title">Kの逆行列（mod 26）</h3>
             <div id="invMatrix" class="matrixDisplay">-</div>
             <details class="explain inv-steps">
               <summary>逆行列の計算過程</summary>
@@ -81,7 +81,7 @@
     </section>
 
     <!-- 暗号化タブ -->
-    <section id="tab-encrypt" class="tab-content">
+    <section id="tab-encrypt" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-encrypt">
       <div class="card">
         <h2>🔒 暗号化</h2>
         <div id="warning-encrypt" class="warning" role="alert" hidden></div>
@@ -89,15 +89,15 @@
           <label for="plaintext">平文（英字のみ有効）</label>
           <textarea id="plaintext" rows="6" placeholder="例: HELLOWORLD"></textarea>
           <div class="muted">非英字、空白、記号は無視。末尾はXでパディングされます。</div>
-          <div style="margin-top: 8px;">
-            <label class="muted-label">処理後の平文</label>
-            <div id="processed-plaintext" class="processed-text">-</div>
+          <div class="gap-top-sm">
+            <span class="muted-label" id="processedLabel">処理後の平文</span>
+            <div id="processed-plaintext" class="processed-text" aria-labelledby="processedLabel">-</div>
             <div id="encrypt-info" class="muted"></div>
           </div>
         </div>
 
-        <div style="margin-top: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="gap-top">
+          <div class="label-row">
             <label for="ciphertext-encrypt">暗号文</label>
             <button id="btnCopyEncrypt" class="copy-btn" title="クリップボードにコピー">📋 コピー</button>
           </div>
@@ -121,12 +121,12 @@
     </section>
 
     <!-- 復号タブ -->
-    <section id="tab-decrypt" class="tab-content">
+    <section id="tab-decrypt" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-decrypt">
       <div class="card">
         <h2>🔓 復号</h2>
         <div id="warning-decrypt" class="warning" role="alert" hidden></div>
         <div>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="label-row">
           <label for="ciphertext-decrypt">暗号文</label>
             <button id="btnSyncCiphertext" class="copy-btn" title="暗号化タブから同期">🔄 同期</button>
           </div>
@@ -135,8 +135,8 @@
           <div id="decrypt-status" class="muted"></div>
         </div>
 
-        <div style="margin-top: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="gap-top">
+          <div class="label-row">
           <label for="plaintext-decrypt">平文</label>
             <button id="btnCopyDecrypt" class="copy-btn" title="クリップボードにコピー">📋 コピー</button>
           </div>
@@ -161,7 +161,7 @@
     </section>
 
     <!-- 座学タブ -->
-    <section id="tab-learn" class="tab-content">
+    <section id="tab-learn" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-learn">
       <div class="card">
         <h2>📚 学びの要点</h2>
 
@@ -216,7 +216,7 @@
   </main>
 
   <footer>
-    <div class="footer">🔗 GitHubリポジトリはこちら（ <a href="https://github.com/ipusiron/hill-cipherlab" target="_blank" rel="noopener noreferrer">ipusiron/hill-cipherlab</a> ）</div>
+    <div class="footer">🔗 <a href="https://github.com/ipusiron/hill-cipherlab" target="_blank" rel="noopener noreferrer">GitHubリポジトリー（ipusiron/hill-cipherlab）</a></div>
   </footer>
 
   <!-- トースト通知 -->
