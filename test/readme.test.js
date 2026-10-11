@@ -6,6 +6,33 @@ import { read, core } from './load.js';
 
 const H = core();
 const readme = read('README.md');
+const english = read('README.en.md');
+
+test('英語READMEはメタデータ・見出し階層・数式・ファイル構成を日本語版とそろえる', () => {
+  assert.equal(english.split('-->')[0], readme.split('-->')[0]);
+  const levels = (s) => [...s.matchAll(/^(#{2,3}) /gm)].map((m) => m[1]);
+  assert.deepEqual(levels(english), levels(readme));
+  const maths = (s) => [...s.matchAll(/```math\n([\s\S]*?)```/g)].map((m) => m[1]);
+  assert.deepEqual(maths(english), maths(readme));
+  const files = (s) => [...s.matchAll(/^[│├└─\s]*([^\s]+)\s+# /gm)].map((m) => m[1]);
+  assert.deepEqual(files(english), files(readme));
+  for (const n of ['157,248', '456,976', '34.4%', '30.1%', '26,208', '1,200', '2,000', '10,002', '100,000']) {
+    assert.ok(english.includes(n), n);
+  }
+});
+
+test('英語READMEは英語画像を参照し、ローカルリンクが実在する', () => {
+  const refs = [...english.matchAll(/!\[[^\]]*\]\((assets\/en\/[^)]+)\)/g)].map((m) => m[1]);
+  assert.equal(refs.length, 4);
+  for (const r of refs) assert.ok(fs.existsSync(new URL(`../${r}`, import.meta.url)), r);
+  assert.deepEqual(fs.readdirSync(new URL('../assets/en/', import.meta.url)).sort(), refs.map((r) => path.basename(r)).sort());
+  for (const m of english.matchAll(/\]\(([^)]+)\)/g)) {
+    if (!/^https?:/.test(m[1])) assert.ok(fs.existsSync(new URL(`../${m[1]}`, import.meta.url)), m[1]);
+  }
+  assert.ok(english.includes('not probabilities of correctness'));
+  assert.ok(english.includes('Do not use it to protect secrets'));
+  assert.ok(!/previously|used to be|earlier version|formerly/i.test(english));
+});
 const fmt = (n) => Number(n).toLocaleString('en-US');
 const K2 = [[3, 3], [2, 5]];
 const K3 = [[6, 24, 1], [13, 16, 10], [20, 17, 15]];
@@ -56,7 +83,7 @@ test('シリーズの定型: H1・Day の行・プロジェクトのリンク', 
 
 test('画像: README の参照はすべて実在し、assets/ の PNG は README から参照されているものだけ', () => {
   const refs = [...readme.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1]).filter((s) => !/^https?:/.test(s));
-  assert.equal(refs.length, 3);
+  assert.equal(refs.length, 4);
   for (const r of refs) assert.ok(fs.existsSync(new URL(`../${r}`, import.meta.url)), r);
   const pngs = fs.readdirSync(new URL('../assets/', import.meta.url)).filter((f) => f.endsWith('.png')).map((f) => `assets/${f}`);
   assert.deepEqual(pngs.sort(), refs.slice().sort());

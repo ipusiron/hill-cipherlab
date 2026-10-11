@@ -229,8 +229,8 @@ test('上限: 英字ちょうど 10,000 字は 3×3 でも暗号化でき、10,0
   // 英字が上限内でも、入力欄そのものが長すぎれば止める
   const raw = H.encrypt(K2, ' '.repeat(100001));
   assert.equal(raw.error.key, 'err.inputTooLong');
-  // 復号は英字の数そのもので判定する（10,002 字の暗号文は上限を超える）
-  assert.equal(H.decrypt(K3, e.output).error.key, 'err.tooLong');
+  // 暗号化で足した最大2文字を復号側も受け入れ、上限で往復できる。
+  assert.equal(H.decrypt(K3, e.output).output, e.processed);
   assert.equal(H.decrypt(K2, 'AB'.repeat(5000)).ok, true);
 });
 

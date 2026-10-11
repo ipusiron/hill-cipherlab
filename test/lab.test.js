@@ -5,6 +5,13 @@ load('js/hill-core.js');
 load('js/hill-lab.js');
 const H = globalThis.HillCore;
 const L = globalThis.HillLab;
+test('上限の3×3平文はパディング後も復号できる', () => {
+  const k = [[6, 24, 1], [13, 16, 10], [20, 17, 15]];
+  const e = H.encrypt(k, 'A'.repeat(10000));
+  assert.equal(e.output.length, 10002);
+  assert.equal(H.decrypt(k, e.output).output, e.processed);
+  assert.equal(H.decrypt(k, 'A'.repeat(10003)).error.key, 'err.tooLong');
+});
 test('線形性は2×2と3×3で成り立ち、暗号化とも一致する', () => {
   for (const key of [[[3, 3], [2, 5]], [[6, 24, 1], [13, 16, 10], [20, 17, 15]]]) {
     const n = key.length;
