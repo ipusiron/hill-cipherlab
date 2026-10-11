@@ -4,19 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Hill CipherLab** is a browser-based educational tool for the Hill cipher, a classical cryptographic algorithm that uses linear algebra (matrix operations) over mod 26. The tool supports both 2×2 and 3×3 key matrices for encryption/decryption.
+**Hill CipherLab** is a browser-based educational tool for the Hill cipher, a classical cryptographic algorithm that uses linear algebra (matrix operations) over mod 26. The tool supports both 2×2 and 3×3 key matrices for encryption/decryption and shows every step of the modular matrix inverse.
 
 - **Demo**: https://ipusiron.github.io/hill-cipherlab/
 - **Part of**: "100 Security Tools with Generative AI" project (Day 93)
-- **Tech Stack**: Vanilla JavaScript (no frameworks), HTML, CSS
-- **Deployment**: GitHub Pages (static site)
+- **Tech Stack**: Vanilla JavaScript (classic scripts, no frameworks, no dependencies), HTML, CSS
+- **Deployment**: GitHub Pages (static site, legacy build from `main` /, `.nojekyll`)
 
 ## Running the Application
 
-Since this is a static HTML/CSS/JS application:
+The scripts are classic scripts (not ES modules), so both ways work:
 
 ```bash
-# Open directly in browser (Windows)
+# Open directly in browser (file://)
 start index.html
 
 # Or use any local web server
@@ -24,104 +24,73 @@ python -m http.server 8000
 # Then visit http://localhost:8000
 ```
 
-No build process, dependencies, or compilation required.
+## Tests
+
+```bash
+npm test   # node --test (Node.js 22+), no dependencies
+```
+
+GitHub Actions (`.github/workflows/test.yml`) runs the same on push and pull_request.
+Do not change expected values to make a test pass; fix the code. README numbers are recomputed by `test/readme.test.js`.
 
 ## Architecture
 
-### Core Algorithm (script.js)
+### Files
 
-The implementation follows this structure:
+- `js/hill-core.js` — `globalThis.HillCore`. DOM-free math: `mod`, `gcd`, `egcdSteps`, `modInv`, `normalizeText` (NFKC, uppercase, A–Z only), `det` / `cofactorMatrix` / `adjugate` (integers), `matMul` / `matVec` (mod 26), `analyzeKey` (validation, reason, inverse, check), `parseCells` (integer-only key cells), `encrypt` / `decrypt` (blocks with per-row sums for the log), `randomInvertible` (crypto.getRandomValues), `invertibleCount` (|GL(n,2)|·|GL(n,13)|)
+- `js/messages.js` — `globalThis.HillMessages`. All UI strings (`t(key, params)`, `tm({ key, params })`). The core returns `{ key, params }` instead of text
+- `script.js` — DOM only. Recomputes encryption/decryption whenever the key, plaintext or ciphertext changes (`refreshOutputs`), so stale results never remain
+- `index.html` — 4 tabs (WAI-ARIA tabs). Meta CSP: no inline script/style, no external hosts
+- `style.css` — Calm light theme. All text/background pairs are ≥ 4.5:1 (`test/contrast.test.js`)
 
-1. **Modular Arithmetic Utilities** (~lines 30-72):
-   - `gcd(a, b)`: Euclidean algorithm for greatest common divisor
-   - `mod(a, m)`: Modular reduction (always returns non-negative)
-   - `modInv(a, m)`: Extended Euclidean algorithm for modular multiplicative inverse
+Load order (all `defer`): `js/hill-core.js` → `js/messages.js` → `script.js`.
 
-2. **Matrix Operations** (~lines 114-227):
-   - `det2(M)` / `det3(M)`: Determinant calculation for 2×2 and 3×3 matrices
-   - `adjugate2(M)` / `adjugate3(M)`: Adjugate matrix via cofactor matrix transpose
-   - `matMulVec(M, v)`: Matrix-vector multiplication (mod 26)
-   - `matScalar(M, s)`: Scalar multiplication of matrix
+### Behaviour that matters
 
-3. **Key Validation** (`updateKeyInfo()` ~line 364):
-   - Checks if `gcd(det(K), 26) = 1` (required for invertibility)
-   - Computes modular inverse of determinant
-   - Displays inverse matrix K⁻¹ in UI
-
-4. **Encryption/Decryption** (`encrypt()` / `decrypt()` ~lines 459-522):
-   - Converts A-Z to 0-25
-   - Pads plaintext/ciphertext with 'X' (23) to block size
-   - Encrypts: `C ≡ K·P (mod 26)`
-   - Decrypts: `P ≡ K⁻¹·C (mod 26)`
-
-For detailed algorithm explanations and code snippets, see [TECHNICAL.md](TECHNICAL.md).
+- Key cells accept integers in −999..999 only. Empty, decimal, exponent (`1e2`) or out-of-range cells are reported with row/column and the key is treated as unusable
+- `det(K)` in the details panel is the determinant of the entered integers (not of the reduced matrix)
+- Encryption pads with `X`. Decryption never pads: if the letter count is not a multiple of the block size it stops (`err.length`). While typing it shows a soft hint; the Decrypt button shows the warning
+- Limits: 10,000 letters (counted before padding, so 3×3 with 10,000 letters gives 10,002), 100,000 input characters
+- The processing log shows the first 200 blocks
 
 ### Hill Cipher Mathematics
 
 - **Alphabet Mapping**: A=0, B=1, ..., Z=25
 - **Key Matrix K**: n×n matrix where n ∈ {2, 3}
 - **Invertibility Condition**: `gcd(det(K), 26) = 1` (det must not be divisible by 2 or 13)
-- **Encryption**: For plaintext vector P, ciphertext C = K·P (mod 26)
+- **Encryption**: C = K·P (mod 26)
 - **Decryption**: P = K⁻¹·C (mod 26), where K⁻¹ = det(K)⁻¹ · adj(K) (mod 26)
+- **Invertible keys**: 2×2 157,248 / 456,976 (34.4%), 3×3 about 30.1%
 
-### UI Structure (index.html)
+## Conventions
 
-1. **Matrix Input Section**: Dynamic grid for 2×2 or 3×3 key matrix
-2. **Key Validation Panel**: Shows det(K), gcd, invertibility status, and K⁻¹
-3. **Encryption/Decryption Section**: Text areas for plaintext/ciphertext
-4. **Processing Log**: Detailed block-by-block calculation steps
-
-## Important Implementation Details
-
-### Why Determinant Must Satisfy gcd(det, 26) = 1
-
-Since 26 = 2 × 13, a matrix is invertible in ℤ₂₆ only if its determinant is coprime to 26. If det(K) is even or divisible by 13, the modular inverse doesn't exist, making decryption impossible.
-
-### Random Invertible Matrix Generation (line 234)
-
-The `randomInvertible()` function uses trial-and-error: generates random matrices and checks `gcd(det, 26) = 1`. For 3×3 matrices, fewer random matrices satisfy this condition compared to 2×2.
-
-### Padding Behavior
-
-Non-alphabetic characters are ignored. If the text length isn't a multiple of the block size, it's padded with 'X' (value 23). Users should be aware that trailing X's in decrypted text may be padding artifacts.
+- No `innerHTML`; build DOM with `createElement` + `textContent`
+- No Japanese string literals in `script.js` or `js/hill-core.js` (`test/messages.test.js`); add keys to `js/messages.js`
+- Max line length 160 (JS/CSS/tests), 250 (`index.html`); LF line endings (`test/format.test.js`)
+- README keeps the YAML metadata block (inside the HTML comment) unchanged in structure; `id`, `slug`, `repo_url`, `demo_url`, `hub` values are fixed
+- README directory tree lists every file with a one-line description (`test/readme.test.js`)
 
 ## File Structure
 
 ```
 .
-├── index.html       # Main HTML structure and UI elements (4-tab UI)
-├── script.js        # All Hill cipher logic and matrix operations
-├── style.css        # Calm light theme with accessibility features
-├── README.md        # Detailed documentation (Japanese) with cipher theory
-├── TECHNICAL.md     # Technical implementation details (developer docs)
-├── .nojekyll        # GitHub Pages configuration (no Jekyll processing)
-└── .gitignore       # Standard git ignore file
+├── .github/workflows/test.yml  # CI (npm test)
+├── assets/                     # README screenshots
+├── js/hill-core.js             # Math (DOM-free)
+├── js/messages.js              # UI strings
+├── test/                       # node --test
+├── index.html                  # 4-tab UI
+├── script.js                   # DOM logic
+├── style.css                   # Calm light theme
+├── README.md                   # Documentation (Japanese) with cipher theory
+├── TECHNICAL.md                # Technical implementation details
+├── package.json                # npm test only
+├── .nojekyll                   # GitHub Pages configuration
+└── .gitignore                  # Standard git ignore file
 ```
-
-## Historical Context (from README)
-
-- Invented by Lester S. Hill in 1929
-- Used by the U.S. during WWII only for encrypting radio call signs
-- Never widely adopted due to complexity of manual computation
-- First cipher to use algebraic techniques systematically
-- Considered a multialphabetic substitution cipher
-- Vulnerable to known-plaintext attacks (weak by modern standards)
-
-## Relationship to Other Classical Ciphers
-
-From the same author's "100 Security Tools" series:
-- **Caesar Cipher**: Shift cipher (single substitution)
-- **Vigenère Cipher**: Polyalphabetic cipher (character-by-character)
-- **Porta Cipher**: Digraph cipher (2 chars → 1 symbol)
-- **Hill Cipher** (this tool): Matrix-based (n chars → n chars)
-
-Hill cipher can be viewed as matrix-based affine cipher: `Enc(x) = Ax + B` where `B = 0`.
 
 ## Security Considerations
 
-The implementation includes:
-- **XSS prevention**: Input sanitization via `textContent` (not `innerHTML`) and character escaping
-- **DoS prevention**: Input length capped at 10,000 characters
-- **Safe DOM manipulation**: Uses `removeChild` loops instead of `innerHTML = ''`
-
-Note: Hill cipher itself is cryptographically weak (vulnerable to known-plaintext attacks) and should only be used for educational purposes.
+- Meta CSP (`default-src 'self'`, no `unsafe-inline`, `connect-src 'none'`), `no-referrer`
+- Everything runs in the browser; nothing is sent anywhere
+- Hill cipher itself is weak (known-plaintext attacks); keys made by the tool must not be used to protect secrets
