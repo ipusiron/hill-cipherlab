@@ -32,7 +32,10 @@ test('インラインのイベントハンドラー・style 属性・インラ�
   assert.ok(!/\sstyle\s*=/i.test(html), 'style 属性がない');
   assert.ok(!/<style[\s>]/i.test(html), 'style 要素がない');
   const scripts = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)];
-  assert.deepEqual(scripts.map((m) => (m[1].match(/src="([^"]+)"/) || [])[1]), ['js/hill-core.js', 'js/messages.js', 'script.js']);
+  assert.deepEqual(scripts.map((m) => (m[1].match(/src="([^"]+)"/) || [])[1]), [
+    'js/hill-core.js', 'js/english-stats.js', 'js/hill-attack.js', 'js/samples.js',
+    'js/messages.js', 'script.js', 'js/attack-view.js',
+  ]);
   for (const m of scripts) {
     assert.equal(m[2].trim(), '', 'script の中身は空');
     assert.match(m[1], /\sdefer/);
@@ -55,7 +58,7 @@ test('タブは WAI-ARIA のタブの形（tablist・tab・tabpanel が対応す
   const re = new RegExp('<button class="tab[^"]*" id="(tabbtn-[a-z]+)" data-tab="([a-z]+)" role="tab" '
     + 'aria-selected="(true|false)" aria-controls="(tab-[a-z]+)"', 'g');
   const tabs = [...html.matchAll(re)];
-  assert.equal(tabs.length, 4);
+  assert.equal(tabs.length, 5);
   assert.equal(tabs.filter((m) => m[3] === 'true').length, 1);
   for (const m of tabs) {
     assert.equal(m[4], `tab-${m[2]}`);

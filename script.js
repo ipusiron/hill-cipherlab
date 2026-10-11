@@ -530,4 +530,17 @@
 
   // 初期化
   setSize(2);
+
+  // ほかの画面（解読タブなど）から使う部品
+  globalThis.HillApp = {
+    setKey(n, M) {
+      setSize(n);
+      setMatrix(M);
+    },
+    selectTab(name) {
+      const tab = tabs.find((x) => x.dataset.tab === name);
+      if (tab) selectTab(tab);
+    },
+    el, clear, matrixTable, showToast, fmtCount, announce,
+  };
 })();

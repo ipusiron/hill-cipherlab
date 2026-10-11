@@ -572,9 +572,14 @@ hill-cipherlab/
 │   ├── screenshot2.png       # 逆行列の計算過程（3×3）
 │   └── screenshot3.png       # 暗号化タブと処理ログ
 ├── js/                       # 画面と共有する通常のスクリプト（file:// でも動く）
+│   ├── attack-view.js        # 解読タブの表示と入力の処理
+│   ├── english-stats.js      # 英語の単文字とバイグラムの統計
+│   ├── hill-attack.js        # 既知平文攻撃と暗号文単独攻撃
 │   ├── hill-core.js          # 計算部（行列式・逆行列・暗号化・復号。DOM に依存しない）
-│   └── messages.js           # 画面に出す文言の辞書
+│   ├── messages.js           # 画面に出す文言の辞書
+│   └── samples.js            # 解読タブの学習用サンプル
 ├── test/                     # node --test のテスト
+│   ├── attack.test.js        # 解読の既知解答と境界
 │   ├── contrast.test.js      # 配色のコントラスト（4.5:1以上）
 │   ├── core.test.js          # 計算部の既知解答・往復・全数・境界
 │   ├── format.test.js        # 行の長さ・行数・改行コード

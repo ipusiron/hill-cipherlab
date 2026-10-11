@@ -24,6 +24,7 @@
       <button class="tab active" id="tabbtn-key" data-tab="key" role="tab" aria-selected="true" aria-controls="tab-key">🔑 鍵生成</button>
       <button class="tab" id="tabbtn-encrypt" data-tab="encrypt" role="tab" aria-selected="false" aria-controls="tab-encrypt" tabindex="-1">🔒 暗号化</button>
       <button class="tab" id="tabbtn-decrypt" data-tab="decrypt" role="tab" aria-selected="false" aria-controls="tab-decrypt" tabindex="-1">🔓 復号</button>
+      <button class="tab" id="tabbtn-attack" data-tab="attack" role="tab" aria-selected="false" aria-controls="tab-attack" tabindex="-1">🗝️ 解読</button>
       <button class="tab" id="tabbtn-learn" data-tab="learn" role="tab" aria-selected="false" aria-controls="tab-learn" tabindex="-1">📚 座学</button>
     </div>
 
@@ -160,6 +161,72 @@
       </div>
     </section>
 
+    <!-- 解読タブ -->
+    <section id="tab-attack" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-attack">
+      <div class="card">
+        <h2>🗝️ 既知平文攻撃</h2>
+        <p class="lead">ヒル暗号は線形なので、平文と暗号文の組がいくつかわかると、鍵を連立一次方程式として求められます。26 = 2 × 13 なので、mod 2 と mod 13 に分けて解き、中国剰余定理で戻します。</p>
+        <h3 class="field-title" id="kpaSizeTitle">鍵のサイズ</h3>
+        <div class="segmented" role="group" aria-labelledby="kpaSizeTitle">
+          <button id="kpaSize2" class="seg active" aria-pressed="true">2×2</button>
+          <button id="kpaSize3" class="seg" aria-pressed="false">3×3</button>
+        </div>
+        <fieldset class="mode">
+          <legend>わかっている平文</legend>
+          <label class="radio" for="kpaModeAligned"><input type="radio" name="kpaMode" id="kpaModeAligned" value="aligned" checked> 暗号文の先頭からの平文</label>
+          <label class="radio" for="kpaModeCrib"><input type="radio" name="kpaMode" id="kpaModeCrib" value="crib"> 平文の一部（クリブ）だけ。位置はわからない</label>
+        </fieldset>
+        <label for="kpa-plain" id="kpaPlainLabel">平文（暗号文の先頭から）</label>
+        <textarea id="kpa-plain" rows="3" placeholder="例: HELP"></textarea>
+        <label for="kpa-cipher">暗号文</label>
+        <textarea id="kpa-cipher" rows="3" placeholder="例: HIAT"></textarea>
+        <div class="sample-row" role="group" aria-label="例を入れる">
+          <span class="muted">例:</span>
+          <button class="sample-btn" data-kpa="help">HELP</button>
+          <button class="sample-btn" data-kpa="even">ACEG（候補が残る）</button>
+          <button class="sample-btn" data-kpa="evenMore">ACEGHELP</button>
+          <button class="sample-btn" data-kpa="dawn">ATTACKATDAWN（3×3）</button>
+          <button class="sample-btn" data-kpa="retreat">RETREATNOWPLEASE（3×3）</button>
+          <button class="sample-btn" data-kpa="crib">クリブ THE LIGHTHOUSE</button>
+        </div>
+        <div class="actions">
+          <div class="actions-primary">
+            <button id="btnKpa" class="primary">鍵を求める</button>
+          </div>
+          <div class="actions-secondary">
+            <button id="btnKpaUse" disabled>この鍵を鍵生成タブに入れる</button>
+          </div>
+        </div>
+        <div id="kpa-result" class="result" aria-live="polite"></div>
+      </div>
+
+      <div class="card">
+        <h2>🔍 暗号文単独攻撃（行ごとの総当たり）</h2>
+        <p class="lead">鍵の逆行列 K⁻¹ を1行ずつ総当たりし、戻した文字が英語の文字の頻度にどれだけ近いかで順位をつけます。上位の行を並べ替えて組み合わせ、2文字の並び（バイグラム）の英語らしさで選びます。暗号文は英語の文を暗号化したものとします。</p>
+        <h3 class="field-title" id="coaSizeTitle">鍵のサイズ</h3>
+        <div class="segmented" role="group" aria-labelledby="coaSizeTitle">
+          <button id="coaSize2" class="seg active" aria-pressed="true">2×2</button>
+          <button id="coaSize3" class="seg" aria-pressed="false">3×3</button>
+        </div>
+        <label for="coa-cipher">暗号文</label>
+        <textarea id="coa-cipher" rows="4" placeholder="英語の文を暗号化した暗号文（2×2は30字、3×3は90字くらいから）"></textarea>
+        <div class="sample-row" role="group" aria-label="例を入れる">
+          <span class="muted">例:</span>
+          <button class="sample-btn" data-coa="coa2">2×2・60字</button>
+          <button class="sample-btn" data-coa="coa3">3×3・150字</button>
+        </div>
+        <div class="actions">
+          <div class="actions-primary">
+            <button id="btnCoa" class="primary">解読する</button>
+          </div>
+          <div class="actions-secondary">
+            <button id="btnCoaUse" disabled>この鍵を鍵生成タブに入れる</button>
+          </div>
+        </div>
+        <div id="coa-result" class="result" aria-live="polite"></div>
+      </div>
+    </section>
+
     <!-- 座学タブ -->
     <section id="tab-learn" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-learn">
       <div class="card">
@@ -224,7 +291,11 @@
   <div id="sr-status" class="sr-only" aria-live="polite"></div>
 
   <script src="js/hill-core.js" defer></script>
+  <script src="js/english-stats.js" defer></script>
+  <script src="js/hill-attack.js" defer></script>
+  <script src="js/samples.js" defer></script>
   <script src="js/messages.js" defer></script>
   <script src="script.js" defer></script>
+  <script src="js/attack-view.js" defer></script>
 </body>
 </html>
