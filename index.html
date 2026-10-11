@@ -40,6 +40,7 @@
             </div>
 
             <div id="matrixArea"></div>
+            <ul id="keyErrors" class="key-errors" aria-live="polite" hidden></ul>
 
             <div class="actions compact key-actions">
               <button id="btnRandom">ランダム生成（可逆）</button>
@@ -54,6 +55,7 @@
             <label>鍵の検証</label>
             <div class="info">
               <div><strong>使用可否</strong>: <span id="invertible">-</span></div>
+              <p id="keyReason" class="key-reason"></p>
               <details class="keyDetails">
                 <summary>詳細情報を表示</summary>
                 <div class="detailsContent">
@@ -65,8 +67,14 @@
               </details>
             </div>
 
+            <p id="keyRatio" class="muted"></p>
+
             <label>Kの逆行列（mod 26）</label>
             <div id="invMatrix" class="matrixDisplay">-</div>
+            <details class="explain inv-steps">
+              <summary>逆行列の計算過程</summary>
+              <div id="invStepsBody"></div>
+            </details>
           </div>
         </div>
       </div>
@@ -76,7 +84,7 @@
     <section id="tab-encrypt" class="tab-content">
       <div class="card">
         <h2>🔒 暗号化</h2>
-        <div id="warning-encrypt" class="warning hidden"></div>
+        <div id="warning-encrypt" class="warning" role="alert" hidden></div>
         <div>
           <label for="plaintext">平文（英字のみ有効）</label>
           <textarea id="plaintext" rows="6" placeholder="例: HELLOWORLD"></textarea>
@@ -84,6 +92,7 @@
           <div style="margin-top: 8px;">
             <label class="muted-label">処理後の平文</label>
             <div id="processed-plaintext" class="processed-text">-</div>
+            <div id="encrypt-info" class="muted"></div>
           </div>
         </div>
 
@@ -115,14 +124,15 @@
     <section id="tab-decrypt" class="tab-content">
       <div class="card">
         <h2>🔓 復号</h2>
-        <div id="warning-decrypt" class="warning hidden"></div>
+        <div id="warning-decrypt" class="warning" role="alert" hidden></div>
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
           <label for="ciphertext-decrypt">暗号文</label>
             <button id="btnSyncCiphertext" class="copy-btn" title="暗号化タブから同期">🔄 同期</button>
           </div>
-          <textarea id="ciphertext-decrypt" rows="6" placeholder="例: HIATXXX"></textarea>
-          <div class="muted">鍵行列のサイズによっては末尾をXでパディングします。</div>
+          <textarea id="ciphertext-decrypt" rows="6" placeholder="例: HIAT"></textarea>
+          <div class="muted">英字以外は無視します。暗号文の英字の数は、鍵のサイズ（2または3）の倍数になります。</div>
+          <div id="decrypt-status" class="muted"></div>
         </div>
 
         <div style="margin-top: 16px;">
@@ -210,9 +220,11 @@
   </footer>
 
   <!-- トースト通知 -->
-  <div id="toast" class="toast"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="sr-status" class="sr-only" aria-live="polite"></div>
 
-  <script src="js/hill-core.js"></script>
-  <script src="script.js"></script>
+  <script src="js/hill-core.js" defer></script>
+  <script src="js/messages.js" defer></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
