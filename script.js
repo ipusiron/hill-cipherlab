@@ -422,6 +422,7 @@
   const refreshOutputs = () => {
     runEncrypt();
     runDecrypt();
+    document.dispatchEvent(new Event('hillkeychange'));
   };
 
   // ===== イベント =====
@@ -533,6 +534,8 @@
 
   // ほかの画面（解読タブなど）から使う部品
   globalThis.HillApp = {
+    getKey: () => ({ n: N, ...keyState }),
+    refresh: () => { updateKeyInfo(); updateRatio(); },
     setKey(n, M) {
       setSize(n);
       setMatrix(M);

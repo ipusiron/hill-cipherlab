@@ -230,6 +230,17 @@
     <!-- 座学タブ -->
     <section id="tab-learn" class="tab-content" role="tabpanel" aria-labelledby="tabbtn-learn">
       <div class="card">
+        <h2>🧮 線形性の実験</h2>
+        <p>鍵生成タブの鍵を使い、1ブロックずつのPとQを足します。加算はXORではなく、成分ごとのmod 26です。</p>
+        <label for="lab-p">ブロックP</label>
+        <input id="lab-p" type="text" value="HE" maxlength="30">
+        <label for="lab-q">ブロックQ</label>
+        <input id="lab-q" type="text" value="LP" maxlength="30">
+        <div class="actions"><button id="lab-sample">現在のサイズの例を入れる</button></div>
+        <div id="lab-result" class="result" aria-live="polite"></div>
+        <p>暗号文にも加算の関係が残ります。拡散があっても、線形な変換だけでは安全な暗号になりません。</p>
+      </div>
+      <div class="card">
         <h2>📚 学びの要点</h2>
 
         <details class="learn-accordion" open>
@@ -293,9 +304,11 @@
   <script src="js/hill-core.js" defer></script>
   <script src="js/english-stats.js" defer></script>
   <script src="js/hill-attack.js" defer></script>
+  <script src="js/hill-lab.js" defer></script>
   <script src="js/samples.js" defer></script>
   <script src="js/messages.js" defer></script>
   <script src="script.js" defer></script>
   <script src="js/attack-view.js" defer></script>
+  <script src="js/lab-view.js" defer></script>
 </body>
 </html>

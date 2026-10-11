@@ -33,8 +33,8 @@ test('インラインのイベントハンドラー・style 属性・インラ�
   assert.ok(!/<style[\s>]/i.test(html), 'style 要素がない');
   const scripts = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)];
   assert.deepEqual(scripts.map((m) => (m[1].match(/src="([^"]+)"/) || [])[1]), [
-    'js/hill-core.js', 'js/english-stats.js', 'js/hill-attack.js', 'js/samples.js',
-    'js/messages.js', 'script.js', 'js/attack-view.js',
+    'js/hill-core.js', 'js/english-stats.js', 'js/hill-attack.js', 'js/hill-lab.js', 'js/samples.js',
+    'js/messages.js', 'script.js', 'js/attack-view.js', 'js/lab-view.js',
   ]);
   for (const m of scripts) {
     assert.equal(m[2].trim(), '', 'script の中身は空');

@@ -576,6 +576,8 @@ hill-cipherlab/
 │   ├── english-stats.js      # 英語の単文字とバイグラムの統計
 │   ├── hill-attack.js        # 既知平文攻撃と暗号文単独攻撃
 │   ├── hill-core.js          # 計算部（行列式・逆行列・暗号化・復号。DOM に依存しない）
+│   ├── hill-lab.js           # 線形性の計算とURL入力の検証
+│   ├── lab-view.js           # 線形性の実験とURL入力の表示
 │   ├── messages.js           # 画面に出す文言の辞書
 │   └── samples.js            # 解読タブの学習用サンプル
 ├── test/                     # node --test のテスト
@@ -585,6 +587,7 @@ hill-cipherlab/
 │   ├── format.test.js        # 行の長さ・行数・改行コード
 │   ├── html.test.js          # index.html の CSP・ARIA・id
 │   ├── load.js               # 通常のスクリプトをテストに読み込む道具
+│   ├── lab.test.js           # 線形性とURL入力の境界
 │   ├── messages.test.js      # 辞書のキーと、画面の処理に日本語を置かないこと
 │   └── readme.test.js        # README の例・数値・構造の検証
 ├── .gitignore                # Git の除外設定
