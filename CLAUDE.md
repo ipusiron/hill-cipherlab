@@ -40,17 +40,24 @@ Do not change expected values to make a test pass; fix the code. README numbers 
 - `js/hill-core.js` — `globalThis.HillCore`. DOM-free math: `mod`, `gcd`, `egcdSteps`, `modInv`, `normalizeText` (NFKC, uppercase, A–Z only), `det` / `cofactorMatrix` / `adjugate` (integers), `matMul` / `matVec` (mod 26), `analyzeKey` (validation, reason, inverse, check), `parseCells` (integer-only key cells), `encrypt` / `decrypt` (blocks with per-row sums for the log), `randomInvertible` (crypto.getRandomValues), `invertibleCount` (|GL(n,2)|·|GL(n,13)|)
 - `js/messages.js` — `globalThis.HillMessages`. All UI strings (`t(key, params)`, `tm({ key, params })`). The core returns `{ key, params }` instead of text
 - `script.js` — DOM only. Recomputes encryption/decryption whenever the key, plaintext or ciphertext changes (`refreshOutputs`), so stale results never remain
-- `index.html` — 4 tabs (WAI-ARIA tabs). Meta CSP: no inline script/style, no external hosts
+- `index.html` — 5 tabs (WAI-ARIA tabs). Meta CSP: no inline script/style, no external hosts
+- `js/hill-attack.js` / `js/attack-view.js` — known-plaintext, crib and row-by-row ciphertext-only attacks
+- `js/hill-lab.js` / `js/lab-view.js` — linearity experiment and validated URL fragment import
+- `js/static-messages.js` / `js/i18n.js` — static text translation and language switching with form-state preservation
+- `js/english-stats.js` / `js/samples.js` — bundled English statistics (Day018, MIT) and teaching samples
 - `style.css` — Calm light theme. All text/background pairs are ≥ 4.5:1 (`test/contrast.test.js`)
 
-Load order (all `defer`): `js/hill-core.js` → `js/messages.js` → `script.js`.
+Load order (all `defer`): core → English statistics → attack → lab → samples → messages → static messages → i18n → script → attack view → lab view.
 
 ### Behaviour that matters
 
 - Key cells accept integers in −999..999 only. Empty, decimal, exponent (`1e2`) or out-of-range cells are reported with row/column and the key is treated as unusable
 - `det(K)` in the details panel is the determinant of the entered integers (not of the reduced matrix)
 - Encryption pads with `X`. Decryption never pads: if the letter count is not a multiple of the block size it stops (`err.length`). While typing it shows a soft hint; the Decrypt button shows the warning
-- Limits: 10,000 letters (counted before padding, so 3×3 with 10,000 letters gives 10,002), 100,000 input characters
+- Limits: 10,000 plaintext letters; decryption accepts padded 3×3 ciphertext up to 10,002; 100,000 raw input characters
+- Attack limits: 10,000 letters; crib search: 2,000 ciphertext letters / 200 crib letters
+- Language: query `?lang=ja|en` overrides the saved `hill-language` preference; only the preference is stored
+- URL fragment: `#text=ASCII_LETTERS&key=JSON_MATRIX`. No automatic cryptanalysis. Never put secrets in shared URLs
 - The processing log shows the first 200 blocks
 
 ### Hill Cipher Mathematics
@@ -79,10 +86,11 @@ Load order (all `defer`): `js/hill-core.js` → `js/messages.js` → `script.js`
 ├── js/hill-core.js             # Math (DOM-free)
 ├── js/messages.js              # UI strings
 ├── test/                       # node --test
-├── index.html                  # 4-tab UI
+├── index.html                  # 5-tab UI
 ├── script.js                   # DOM logic
 ├── style.css                   # Calm light theme
 ├── README.md                   # Documentation (Japanese) with cipher theory
+├── README.en.md                # English documentation and screenshots
 ├── TECHNICAL.md                # Technical implementation details
 ├── package.json                # npm test only
 ├── .nojekyll                   # GitHub Pages configuration

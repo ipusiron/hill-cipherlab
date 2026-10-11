@@ -15,7 +15,7 @@
 6. [パフォーマンス](#6-パフォーマンス)
 7. [アーキテクチャ設計](#7-アーキテクチャ設計)
 8. [テスト](#8-テスト)
-9. [今後の拡張案](#9-今後の拡張案)
+9. [解読と学習機能](#9-解読と学習機能)
 10. [参考文献](#10-参考文献)
 
 ---
@@ -79,7 +79,7 @@ function blockSteps(M, v) {
 function decrypt(K, text) {
   const a = analyzeKey(K);
   if (!a.invertible) return { ok: false, error: msg('err.notInvertible', { gcd: a.gcd }) };
-  const c = checkInput(text);
+  const c = checkInput(text, Math.ceil(LIMITS.letters / K.length) * K.length);
   if (c.error) return { ok: false, error: c.error };
   const n = K.length;
   const { letters, ignored } = c.norm;
@@ -584,18 +584,22 @@ GitHub Actions（`.github/workflows/test.yml`）でも、push と pull_request �
 
 ---
 
-## 9. 今後の拡張案
+## 9. 解読と学習機能
 
-### 9.1 機能拡張
+### 9.1 解読タブ
 
-- 既知平文攻撃のデモ：平文と暗号文の組から鍵を求める。平文の行列が mod 26 で非可逆でも、mod 2 と mod 13 に分けて解く
-- 暗号文単独攻撃：鍵の逆行列を1行ずつ総当たりし、英語の文字頻度で順位をつける（Bauer & Millward 2007）
-- 4×4以上の行列対応、カスタムアルファベット（mod 29 など）
+- `js/hill-attack.js`が既知平文攻撃、クリブ探索、暗号文単独攻撃を計算する。
+- 既知平文攻撃はmod 2とmod 13で掃き出し法を使い、両方が一意ならCRTで組み合わせる。候補数には非可逆行列も含む。
+- クリブ探索は全位置を試す。完全なブロックから鍵を決め、不完全な端のブロックも復号して一致を確認する。
+- 暗号文単独攻撃は各行の単文字スコアから上位12行または20行を選び、その順列の可逆な組をバイグラムで採点する。正解の保証はない。
+- `js/attack-view.js`が結果を表示する。重い探索はボタンで実行し、入力変更で候補と適用ボタンを無効にする。
 
-### 9.2 教育機能の強化
+### 9.2 線形性と言語
 
-- 線形性の実験：平文を1文字変えると、そのブロックだけが変わることを見せる
-- クイズモード：逆行列や暗号文を手で求める練習問題
+- `js/hill-lab.js`でE(P + Q) = E(P) + E(Q)を計算する。`js/lab-view.js`が鍵の変更にも追従する。
+- `js/messages.js`と`js/static-messages.js`に日英の文言を置く。`js/i18n.js`はテキストノードと属性だけを書き換え、入力を保持する。
+- URLの`text`と`key`は`parseFragment`で検証する。詳細と上限はREADMEの「ほかのツールからの入力」を参照する。
+- 4×4以上、カスタムアルファベット、クイズは未実装である。
 
 ---
 

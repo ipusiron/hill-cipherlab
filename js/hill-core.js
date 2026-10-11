@@ -198,12 +198,12 @@
     return { blocks, out };
   }
 
-  function checkInput(text) {
+  function checkInput(text, limit = LIMITS.letters) {
     const raw = String(text == null ? '' : text);
     if (raw.length > LIMITS.inputChars) return { error: msg('err.inputTooLong', { limit: LIMITS.inputChars }) };
     const norm = normalizeText(raw);
-    if (norm.letters.length > LIMITS.letters) {
-      return { error: msg('err.tooLong', { limit: LIMITS.letters, count: norm.letters.length }) };
+    if (norm.letters.length > limit) {
+      return { error: msg('err.tooLong', { limit, count: norm.letters.length }) };
     }
     return { norm };
   }
@@ -233,7 +233,7 @@
   function decrypt(K, text) {
     const a = analyzeKey(K);
     if (!a.invertible) return { ok: false, error: msg('err.notInvertible', { gcd: a.gcd }) };
-    const c = checkInput(text);
+    const c = checkInput(text, Math.ceil(LIMITS.letters / K.length) * K.length);
     if (c.error) return { ok: false, error: c.error };
     const n = K.length;
     const { letters, ignored } = c.norm;
