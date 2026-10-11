@@ -23,203 +23,33 @@
 (() => {
   'use strict';
 
-  // ===== 定数定義 =====
-  const MOD = 26; // モジュラー演算の法（A-Zの文字数）
+  // ===== 計算部（js/hill-core.js）=====
+  const H = globalThis.HillCore;
+  const MOD = H.MOD;
+  const { gcd, mod, modInv } = H;
 
-  // ===== ユーティリティ関数 =====
+  const toAlphaNums = (s) => H.toNums(H.normalizeText(s).letters);
+  const fromAlphaNums = (arr) => H.toLetters(arr);
 
-  /**
-   * 最大公約数を計算（ユークリッドの互除法）
-   * @param {number} a - 整数1
-   * @param {number} b - 整数2
-   * @returns {number} - aとbの最大公約数
-   */
-  const gcd = (a, b) => {
-    a = Math.abs(a); b = Math.abs(b);
-    while (b) [a, b] = [b, a % b];
-    return a;
-  };
-
-  /**
-   * モジュラー演算（常に正の剰余を返す）
-   * @param {number} a - 被除数
-   * @param {number} m - 法（デフォルト: 26）
-   * @returns {number} - 0 <= r < m の範囲の剰余
-   */
-  const mod = (a, m=MOD) => {
-    let r = a % m;
-    return r < 0 ? r + m : r;
-  };
-
-  /**
-   * 拡張ユークリッドの互除法でモジュラー逆元を計算
-   * @param {number} a - 逆元を求める数
-   * @param {number} m - 法（デフォルト: 26）
-   * @returns {number|null} - 逆元（存在しない場合はnull）
-   */
-  const modInv = (a, m=MOD) => {
-    a = mod(a, m);
-    if (a === 0) return null; // 0には逆元が存在しない
-    let [t, newT] = [0, 1];
-    let [r, newR] = [m, a];
-    while (newR !== 0) {
-      const q = Math.floor(r / newR);
-      [t, newT] = [newT, t - q * newT];
-      [r, newR] = [newR, r - q * newR];
-    }
-    if (r !== 1) return null; // gcd(a,m) ≠ 1 なら逆元なし
-    return mod(t, m);
-  };
-
-  /**
-   * 文字列を数値配列に変換（A=0, B=1, ..., Z=25）
-   * @param {string} s - 入力文字列
-   * @returns {number[]} - 数値配列（英字以外は除外）
-   */
-  const toAlphaNums = (s) =>
-    (s.toUpperCase().match(/[A-Z]/g) || []).map(ch => ch.charCodeAt(0) - 65);
-
-  /**
-   * 数値配列を文字列に変換（0=A, 1=B, ..., 25=Z）
-   * @param {number[]} arr - 数値配列
-   * @returns {string} - 英大文字の文字列
-   */
-  const fromAlphaNums = (arr) =>
-    arr.map(n => String.fromCharCode(65 + mod(n))).join('');
-
-  /**
-   * 配列をnの倍数になるようXでパディング
-   * @param {number[]} nums - 数値配列
-   * @param {number} n - ブロックサイズ
-   * @returns {number[]} - パディング後の配列
-   */
   const padBlocks = (nums, n) => {
     const r = nums.slice();
     while (r.length % n !== 0) r.push(23); // 'X' = 23
     return r;
   };
 
-  /**
-   * 配列をnサイズのブロックに分割
-   * @param {number[]} arr - 入力配列
-   * @param {number} n - ブロックサイズ
-   * @returns {number[][]} - ブロックの配列
-   */
   const chunk = (arr, n) => {
     const out = [];
     for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
     return out;
   };
 
-  // ===== 行列演算 =====
-
-  /**
-   * 2×2行列の行列式を計算（mod 26）
-   * @param {number[][]} M - 2×2行列
-   * @returns {number} - 行列式（mod 26）
-   */
-  const det2 = (M) => mod(M[0][0]*M[1][1] - M[0][1]*M[1][0], MOD);
-
-  /**
-   * 3×3行列の行列式を計算（mod 26）
-   * @param {number[][]} M - 3×3行列
-   * @returns {number} - 行列式（mod 26）
-   */
-  const det3 = (M) => {
-    const a = M[0][0], b = M[0][1], c = M[0][2];
-    const d = M[1][0], e = M[1][1], f = M[1][2];
-    const g = M[2][0], h = M[2][1], i = M[2][2];
-    const D = a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g);
-    return mod(D, MOD);
-  };
-
-  /**
-   * 3×3行列の小行列式（minor）を計算
-   * @param {number[][]} M - 3×3行列
-   * @param {number} row - 除外する行
-   * @param {number} col - 除外する列
-   * @returns {number} - 小行列式（mod 26）
-   */
-  const minor2Det = (M, row, col) => {
-    const m = [];
-    for (let r = 0; r < 3; r++) if (r !== row) {
-      const rowArr = [];
-      for (let c = 0; c < 3; c++) if (c !== col) {
-        rowArr.push(M[r][c]);
-      }
-      m.push(rowArr);
-    }
-    return mod(m[0][0]*m[1][1] - m[0][1]*m[1][0], MOD);
-  };
-
-  /**
-   * 2×2行列の随伴行列（adjugate）を計算
-   * @param {number[][]} M - 2×2行列 [[a,b],[c,d]]
-   * @returns {number[][]} - 随伴行列 [[d,-b],[-c,a]]（各要素 mod 26）
-   */
-  const adjugate2 = (M) => {
-    const [[a,b],[c,d]] = M;
-    return [
-      [ mod(d), mod(-b) ],
-      [ mod(-c), mod(a) ]
-    ];
-  };
-
-  /**
-   * 3×3行列の随伴行列（adjugate）を計算
-   * 手順: 余因子行列を作成 → 転置
-   * @param {number[][]} M - 3×3行列
-   * @returns {number[][]} - 随伴行列（mod 26）
-   */
-  const adjugate3 = (M) => {
-    // 余因子行列を計算
-    const cof = Array.from({length:3},()=>Array(3).fill(0));
-    for (let i=0;i<3;i++){
-      for (let j=0;j<3;j++){
-        const sign = ((i+j)%2===0)? 1 : -1;
-        cof[i][j] = mod(sign * minor2Det(M, i, j));
-      }
-    }
-    // 転置して随伴行列を得る
-    const adj = Array.from({length:3},()=>Array(3).fill(0));
-    for (let i=0;i<3;i++){
-      for (let j=0;j<3;j++){
-        adj[i][j] = cof[j][i];
-      }
-    }
-    return adj;
-  };
-
-  /**
-   * 行列とベクトルの乗算（mod 26）
-   * @param {number[][]} M - n×n行列
-   * @param {number[]} v - 長さnのベクトル
-   * @returns {number[]} - 結果ベクトル（各要素 mod 26）
-   */
-  const matMulVec = (M, v) => {
-    const n = M.length;
-    const res = Array(n).fill(0);
-    for (let i=0;i<n;i++){
-      let s = 0;
-      for (let j=0;j<n;j++) s += M[i][j]*v[j];
-      res[i] = mod(s);
-    }
-    return res;
-  };
-
-  /**
-   * 行列のスカラー倍（mod 26）
-   * @param {number[][]} M - 行列
-   * @param {number} s - スカラー値
-   * @returns {number[][]} - スカラー倍した行列（各要素 mod 26）
-   */
+  const det2 = (M) => mod(H.det(M));
+  const det3 = (M) => mod(H.det(M));
+  const adjugate2 = (M) => H.adjugate(M).map((row) => row.map((x) => mod(x)));
+  const adjugate3 = adjugate2;
+  const matMulVec = (M, v) => H.matVec(M, v);
   const matScalar = (M, s) => M.map(row => row.map(x => mod(x*s)));
 
-  /**
-   * 行列をHTML整形して表示
-   * @param {number[][]|null} M - 表示する行列
-   * @returns {string} - HTML文字列
-   */
   const matrixToHTML = (M) => {
     if (!M) return '-';
     const rows = M.map(r => r.map(x => String(mod(x)).padStart(2,' ')).join('  '));
