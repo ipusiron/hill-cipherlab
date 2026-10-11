@@ -24,6 +24,14 @@
   // 英字の目安（参照実装で、無作為の鍵と英文の切り出しを試した結果。README の表と同じ値）
   const GUIDE = { 2: 30, 3: 90 };
 
+  // Bound work before normalization or matrix search. No silent truncation.
+  const checked = (text, limit = 10000) => {
+    if (text.length > 100000) return { error: msg('err.inputTooLong', { limit: 100000 }) };
+    const letters = H.normalizeText(text).letters;
+    if (letters.length > limit) return { error: msg('err.tooLong', { count: letters.length, limit }) };
+    return { letters };
+  };
+
   const english = () => root.HillEnglish;
 
   /** 数の列を n 個ずつのブロックにする（余りは捨てる） */
@@ -104,8 +112,11 @@
    *         'notInvertible'（決まった行列が鍵として使えない）／'inconsistent'（この大きさのヒル暗号では説明できない）
    */
   function knownPlaintext(n, plainText, cipherText) {
-    const p = H.normalizeText(plainText).letters;
-    const c = H.normalizeText(cipherText).letters;
+    const pc = checked(plainText);
+    const cc = checked(cipherText);
+    if (pc.error || cc.error) return { ok: false, error: pc.error || cc.error };
+    const p = pc.letters;
+    const c = cc.letters;
     if (!p || !c) return { ok: false, error: msg('kpa.err.empty') };
     const len = Math.min(p.length, c.length);
     const m = Math.floor(len / n);
@@ -142,8 +153,11 @@
    * 鍵が一意に決まり可逆になった位置を、復号した文の英語らしさで並べる
    */
   function cribSearch(n, cipherText, crib) {
-    const c = H.normalizeText(cipherText).letters;
-    const w = H.normalizeText(crib).letters;
+    const cc = checked(cipherText, 2000);
+    const wc = checked(crib, 200);
+    if (cc.error || wc.error) return { ok: false, error: cc.error || wc.error };
+    const c = cc.letters;
+    const w = wc.letters;
     if (!c) return { ok: false, error: msg('crib.err.noCipher') };
     if (c.length % n !== 0) return { ok: false, error: msg('err.length', { count: c.length, n, rem: c.length % n, missing: n - (c.length % n) }) };
     if (w.length < n * n) return { ok: false, error: msg('crib.err.short', { n, need: n * n, have: w.length }) };
@@ -163,6 +177,11 @@
       const s = solveBlocks(P, idx.map((b) => C[b]), n);
       if (!s.key || !s.invertible) continue;
       const inv = H.inverse(s.key);
+      // Check the partial blocks at both ends as well as the blocks used to solve K.
+      const start = Math.floor(pos / n) * n;
+      const end = Math.ceil((pos + w.length) / n) * n;
+      const matched = H.toLetters(blocksOf(H.toNums(c.slice(start, end)), n).flatMap((b) => H.matVec(inv, b)));
+      if (matched.slice(pos - start, pos - start + w.length) !== w) continue;
       const plain = [];
       for (const b of blocksOf(head, n)) plain.push(...H.matVec(inv, b));
       results.push({ pos, blocks: idx.length, key: s.key, inverse: inv, score: bigramScore(plain) });
@@ -190,7 +209,9 @@
    */
   function ciphertextOnly(n, cipherText) {
     const E = english();
-    const c = H.normalizeText(cipherText).letters;
+    const cc = checked(cipherText);
+    if (cc.error) return { ok: false, error: cc.error };
+    const c = cc.letters;
     if (!c) return { ok: false, error: msg('coa.err.empty') };
     if (c.length % n !== 0) return { ok: false, error: msg('err.length', { count: c.length, n, rem: c.length % n, missing: n - (c.length % n) }) };
     if (c.length < n * COA.minBlocks) return { ok: false, error: msg('coa.err.short', { need: n * COA.minBlocks, have: c.length }) };

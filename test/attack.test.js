@@ -15,6 +15,37 @@ const K2 = [[3, 3], [2, 5]];
 const K3 = [[6, 24, 1], [13, 16, 10], [20, 17, 15]];
 const LETTERS = H.normalizeText(S.TEXT).letters;
 
+test('暗号文単独攻撃: 2×2と3×3のサンプルの鍵と全文を復元', () => {
+  for (const s of S.COA) {
+    const plain = LETTERS.slice(0, s.letters);
+    const r = A.ciphertextOnly(s.n, H.encrypt(s.key, plain).output);
+    assert.equal(r.ok, true);
+    assert.deepEqual(r.best.key, s.key);
+    assert.equal(r.best.plaintext, plain);
+    assert.equal(r.rowsTried + r.rowsSkipped, 26 ** s.n);
+    for (const x of [r.best, ...r.alternatives]) assert.equal(H.encrypt(x.key, x.plaintext).output, H.encrypt(s.key, plain).output);
+  }
+});
+
+test('解読の入力制限は切り捨てずに誤りを返す', () => {
+  assert.equal(A.knownPlaintext(2, 'A'.repeat(10001), 'ABCD').error.key, 'err.tooLong');
+  assert.equal(A.knownPlaintext(2, ' '.repeat(100001), 'ABCD').error.key, 'err.inputTooLong');
+  assert.equal(A.cribSearch(2, 'A'.repeat(2002), 'HELP').error.key, 'err.tooLong');
+  assert.equal(A.cribSearch(2, 'A'.repeat(300), 'A'.repeat(201)).error.key, 'err.tooLong');
+  assert.equal(A.ciphertextOnly(3, 'A'.repeat(10002)).error.key, 'err.tooLong');
+  assert.equal(A.ciphertextOnly(2, 'ABC').error.key, 'err.length');
+  assert.equal(A.ciphertextOnly(2, 'ABCD').error.key, 'coa.err.short');
+});
+
+test('クリブの端の不完全なブロックも一致する必要がある', () => {
+  const ct = H.encrypt(S.CRIB.key, LETTERS.slice(0, S.CRIB.letters)).output;
+  for (const crib of ['THELIGHTHOUSE', 'XHELIGHTHOUSE', 'THELIGHTHOUSX']) {
+    const r = A.cribSearch(3, ct, crib);
+    for (const x of r.results) assert.equal(x.plaintext.slice(x.pos, x.pos + crib.length), crib);
+    if (crib !== 'THELIGHTHOUSE') assert.ok(!r.results.some((x) => x.pos === 80));
+  }
+});
+
 /** 再現できる擬似乱数（テスト用。core.test.js と同じ形） */
 function lcg(seed) {
   let s = seed >>> 0;
@@ -144,7 +175,7 @@ test('クリブの位置探し: 例文の 240 字に THE LIGHTHOUSE を当てる
   assert.equal(r.results[0].pos, 80);
   assert.deepEqual(r.results[0].key, S.CRIB.key);
   assert.equal(r.results[0].plaintext, LETTERS.slice(0, S.CRIB.letters));
-  assert.ok(r.results[0].score > r.results[1].score + 0.3);
+  for (const x of r.results) assert.equal(x.plaintext.slice(x.pos, x.pos + 13), 'THELIGHTHOUSE');
 });
 
 test('クリブの位置探し: 入力の誤り', () => {

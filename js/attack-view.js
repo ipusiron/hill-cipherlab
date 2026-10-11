@@ -209,8 +209,40 @@
     coaCipher.value = H.encrypt(s.key, letters.slice(0, s.letters)).output;
     resetCoa();
   }));
-  // The ciphertext-only renderer is attached in the next stage.
-  document.addEventListener('languagechange', renderKpa);
+  const renderCoa = () => {
+    clear(coaResult);
+    coaFound = null;
+    const r = coaLast;
+    if (!r) para(coaResult, t('attack.ready'));
+    else if (!r.ok) error(coaResult, r.error);
+    else {
+      para(coaResult, t('coa.summary', {
+        letters: r.letters, scored: r.scored, rows: r.rowsTried, skipped: r.rowsSkipped, combos: r.combosTried,
+      }));
+      para(coaResult, t('attack.scoreNote'));
+      para(coaResult, t('coa.limit'));
+      if (r.short) para(coaResult, t('coa.short', { guide: r.guide }), 'warning');
+      if (r.best) {
+        coaFound = { n: r.n, key: r.best.key };
+        matrices(coaResult, [['K', r.best.key], ['K⁻¹', r.best.inverse]]);
+        textBlock(coaResult, r.best.plaintext);
+        table(coaResult, t('coa.heads').split('|'), [r.best, ...r.alternatives].map((x) => [
+          keyText(x.key), x.score.toFixed(4), x.plaintext.slice(0, PREVIEW),
+        ]), true);
+      } else para(coaResult, t('coa.none'));
+      const details = el('details', 'explain');
+      details.appendChild(el('summary', null, t('coa.rows')));
+      table(details, t('coa.rowHeads').split('|'), r.rows.map((x) => [vecText(x.row), x.score.toFixed(4)]));
+      coaResult.appendChild(details);
+    }
+    btnCoaUse.disabled = !coaFound;
+  };
+  btnCoa.addEventListener('click', () => {
+    coaLast = A.ciphertextOnly(coaN, coaCipher.value);
+    renderCoa();
+    app.announce(t(coaFound ? 'coa.done' : 'coa.none'));
+  });
+  document.addEventListener('languagechange', () => { renderKpa(); renderCoa(); });
   renderKpa();
   resetCoa();
 })();
